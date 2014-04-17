@@ -9,6 +9,8 @@ void setup()
 int dir = 1;  // placeholder value for dir so it doesn't move until the player presses a directional button.
 int xapple, yapple;  
 boolean ateApple = true;
+int score = 0;
+int length = 0;
 struct Point {  // name for the class.
   int x;  // x coordinate.
   int y;  // y coordinate
@@ -24,6 +26,7 @@ Point snakeArray[64] = {s1, s2, s3, s4};  // array that holds the coordinates of
 
 void loop() {
   drawSnake(); 
+  directions();
   snakeUpdate();
   drawApple();
   DisplaySlate();
@@ -32,14 +35,11 @@ void loop() {
 }
 
 void drawSnake() {  // draws first 4 points of the snake. 
-  for (int i = 0; i < 4; i++) {
-    DrawPx(snakeArray[i].x, snakeArray[i].y, 15); 
-  }
-  DrawPx(snakeArray[0].x, snakeArray[0].y, 6);
+    DrawPx(snakeArray[0].x, snakeArray[0].y, Green); 
 }
   
   
-void snakeUpdate() { 
+void directions() { 
   CheckButtonsPress();  // allows button input. 
 
   if (Button_Up) {  // if up button is pressed, reassign dir to 0.
@@ -55,35 +55,32 @@ void snakeUpdate() {
     dir = 270;
   } 
   
-  for (int i = 0; i < 4; i++) {
   if (dir == 0) {  // if up button was the last button pressed, increase y by 1.
-    snakeArray[i].y++;
+    snakeArray[0].y++; 
   }  
   if (dir == 180) {  // if down button was the last button pressed, decrease y by 1.
-    snakeArray[i].y--;
+    snakeArray[0].y--;
   } 
   if (dir == 90) {  // if right button was the last button pressed, increase x by 1.
-    snakeArray[i].x++;
+    snakeArray[0].x++;
   }
   if (dir == 270) {  // if left button was the last button pressed, decrease x by 1.
-    snakeArray[i].x--;
+    snakeArray[0].x--;
   }
   
   
-  if (snakeArray[i].x == -1) {  // snake wraps around from left to right.
-    snakeArray[i].x = 7;
+  if (snakeArray[0].x == -1) {  // snake wraps around from left to right.
+    snakeArray[0].x = 7;
   } 
-  if (snakeArray[i].x == 8) {  // snake wraps around from right to left.
-    snakeArray[i].x = 0;
+  if (snakeArray[0].x == 8) {  // snake wraps around from right to left.
+    snakeArray[0].x = 0;
   }
-  if (snakeArray[i].y == -1) {  // snake wraps around from bottom to top.  
-    snakeArray[i].y = 7;
+  if (snakeArray[0].y == -1) {  // snake wraps around from bottom to top.  
+    snakeArray[0].y = 7;
   }
-  if (snakeArray[i].y == 8) {  // snake wraps around from top to bottom.
-    snakeArray[i].y = 0;
+  if (snakeArray[0].y == 8) {  // snake wraps around from top to bottom.
+    snakeArray[0].y = 0;
   }
-  }
-
 }
 void drawApple() {
   if (ateApple) {  // sets random coordinates for apple. 
@@ -91,13 +88,21 @@ void drawApple() {
     yapple = random(8);  // y-coordinate is random.
     ateApple = false;
   }
-  DrawPx(xapple, yapple, Green);    // draws apple
+  DrawPx(xapple, yapple, Red);    // draws apple
   if (snakeArray[0].x == xapple && snakeArray[0].y == yapple) {  // if snake touches apple, reset coordinates of apple.
         ateApple = true;
-  }
+        score++;
+        length++;
+        Tone_Start(5000, 50);       
+  } 
 }
 
-
-
+void snakeUpdate() { 
+  for (int i = length; i > 0; i--) {
+    snakeArray[i].x = snakeArray[i-1].x;
+    snakeArray[i].y = snakeArray[i-1].y;   
+    DrawPx(snakeArray[i].x, snakeArray[i].y, 15);
+  } 
+} 
 
 
