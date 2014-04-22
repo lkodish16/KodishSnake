@@ -11,17 +11,16 @@ int xapple, yapple;
 boolean ateApple = true;
 int score = 0;
 int length = 0;
+int led; // used later to keep track of the score.
 struct Point {  // name for the class.
   int x;  // x coordinate.
   int y;  // y coordinate
 };
 
-Point s1 = {4,3};  // coordinates for first point on the snake.
-Point s2 = {5,3};  // coordinates for second point on the snake.
-Point s3 = {6,3};  // coordinates for third point on the snake.
-Point s4 = {7,3};  // coordinates for fourth point on the snake.
+Point s1 = {4,3};  // coordinates for the head of the snake.
 
-Point snakeArray[64] = {s1, s2, s3, s4};  // array that holds the coordinates of the points on the snake. 
+
+Point snakeArray[64] = {s1};  // array that holds the coordinates of the points on the snake. 
 
 
 void loop() {
@@ -29,13 +28,14 @@ void loop() {
   directions();
   snakeUpdate();
   drawApple();
+  crash();
   DisplaySlate();
   ClearSlate();
   delay(100);
 }
 
-void drawSnake() {  // draws first 4 points of the snake. 
-    DrawPx(snakeArray[0].x, snakeArray[0].y, Green); 
+void drawSnake() {  // draws the head of the snake
+    DrawPx(snakeArray[0].x, snakeArray[0].y, 15); 
 }
   
   
@@ -93,11 +93,12 @@ void drawApple() {
         ateApple = true;
         score++;
         length++;
-        Tone_Start(5000, 50);       
+        Tone_Start(5000, 50);  // plays a sound if snake eats apple.
+        keepScore();
   } 
 }
 
-void snakeUpdate() { 
+void snakeUpdate() {  // makes the snake move like an actual snake.
   for (int i = length; i > 0; i--) {
     snakeArray[i].x = snakeArray[i-1].x;
     snakeArray[i].y = snakeArray[i-1].y;   
@@ -105,4 +106,44 @@ void snakeUpdate() {
   } 
 } 
 
+void keepScore() {  // uses LEDS to keep track of how many apples the snake has eaten.
+  led = ((led * 2) + 1);  // lights up one LED for each apple eaten. 
+  if (score == 1) {
+    led = 1;
+  }
+  if (led >= 128) // resets once LEDS are maxed out.
+  {
+    led = 1;
+  }
+  SetAuxLEDs(led);
+}
+
+void crash() {  // ends game if the head of the snake crashes into any part of its body. 
+  for (int i = length; i > 1; i--) {
+    if (snakeArray[0].x == snakeArray[i].x && snakeArray[0].y == snakeArray[i].y) {
+      for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+          DrawPx(i,j, Red);
+        }
+      }
+      DisplaySlate();  // freezes screen.
+      while (!Button_A) {  
+        CheckButtonsPress();
+        if (Button_A) {  // restarts game if A button is pressed.
+          ClearSlate();
+          snakeArray[0].x = 4;
+          snakeArray[0].y = 3;
+          length = 0;
+          DrawPx(snakeArray[0].x, snakeArray[0].y, 15);
+          dir = 1;
+          score = 0;
+          SetAuxLEDs(0);
+          DisplaySlate();        
+        }
+      }
+    }
+  }
+}
+      
+  
 
